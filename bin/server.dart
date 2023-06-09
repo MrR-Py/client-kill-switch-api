@@ -1,3 +1,6 @@
+import 'package:client_kill_switch_api/config_controller.dart';
+import 'package:client_kill_switch_api/database_controller.dart';
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -76,6 +79,13 @@ Future<Response> _modifyAppList(Request request) async {
 }
 
   void main(List<String> args) async {
+  print('Starting Client Kill Switch REST Api');
+  var config = Config('./data/config.json');
+  print('Read config file');
+
+  var database = Database(config.dbAddress, config.dbPort.toString(), config.dbName);
+  print('Connected to database');
+
   // Use any available host or container IP (usually `0.0.0.0`).
   final ip = InternetAddress.anyIPv4;
 
@@ -83,7 +93,7 @@ Future<Response> _modifyAppList(Request request) async {
   final handler = Pipeline().addMiddleware(logRequests()).addHandler(_router);
 
   // For running in containers, we respect the PORT environment variable.
-  final port = int.parse(Platform.environment['PORT'] ?? '8080');
+  final port = int.parse(Platform.environment['PORT'] ?? config.serverPort);
   final server = await serve(handler, ip, port);
   print('Server listening on port ${server.port}');
 }
