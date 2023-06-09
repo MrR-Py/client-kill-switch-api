@@ -1,0 +1,10 @@
+{
+  "database": {
+    "port": 27017,
+    "address": "localhost",
+    "name": "client-kill-switch"
+  },
+  "server" :{
+    "port": 8080
+  }
+}
