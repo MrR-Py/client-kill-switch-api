@@ -10,8 +10,7 @@ class Config {
   //dynamic serverAddress;
 
   Config(String configFilePath) {
-    var jsonTemplate =
-    """
+    var jsonTemplate = """
     {
       "database": {
         "port": 27017,
@@ -24,12 +23,11 @@ class Config {
     }
     """;
 
-    // TODO: create file if needed
-    if(!File(configFilePath).existsSync()) {
-     var fileCreate = File(configFilePath);
-     fileCreate.create();
-     fileCreate.openWrite();
-     fileCreate.writeAsStringSync(jsonTemplate);
+    if (!File(configFilePath).existsSync()) {
+      var fileCreate = File(configFilePath);
+      fileCreate.create();
+      fileCreate.openWrite();
+      fileCreate.writeAsStringSync(jsonTemplate);
     }
     var configFile = File(configFilePath);
     var configJson = jsonDecode(configFile.readAsStringSync());
