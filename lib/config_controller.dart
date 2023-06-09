@@ -10,7 +10,27 @@ class Config {
   //dynamic serverAddress;
 
   Config(String configFilePath) {
+    var jsonTemplate =
+    """
+    {
+      "database": {
+        "port": 27017,
+        "address": "localhost",
+        "name": "client-kill-switch"
+      },
+      "server" :{
+        "port": 8080
+      }
+    }
+    """;
+
     // TODO: create file if needed
+    if(!File(configFilePath).existsSync()) {
+     var fileCreate = File(configFilePath);
+     fileCreate.create();
+     fileCreate.openWrite();
+     fileCreate.writeAsStringSync(jsonTemplate);
+    }
     var configFile = File(configFilePath);
     var configJson = jsonDecode(configFile.readAsStringSync());
     assert(configJson is Map);
