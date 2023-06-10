@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:client_kill_switch_api/database_controller.dart';
 import 'package:client_kill_switch_api/config_controller.dart';
@@ -9,6 +10,7 @@ import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 void main(List<String> args) async {
+
   print('Starting Client Kill Switch REST Api');
   var config = Config('./data/config.json');
   print('Read config file');
@@ -22,7 +24,7 @@ void main(List<String> args) async {
     // Use any available host or container IP (usually `0.0.0.0`).
     final ip = InternetAddress.anyIPv4;
 
-    Router? _router = restServer.init(database);
+    Router? _router = restServer.init(database, config);
 
     // Configure a pipeline that logs requests.
     final handler = Pipeline().addMiddleware(logRequests()).addHandler(_router);

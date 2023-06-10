@@ -11,14 +11,9 @@ import 'package:shelf_router/shelf_router.dart';
 class Server {
   var _router;
 
-  Router init(Database database) {
+  Router init(Database database, Config config) {
     Response _rootHandler(Request request) {
       return Response.ok('Client Kill Switch v0.0.1');
-    }
-
-    // TODO: RSA implementation (Maybe ECC?)
-    Response _getRsaPublicKey(Request request) {
-      return Response.ok('Feature not yet implemented');
     }
 
     Future<Response> _getPermissionToRun(Request request) async {
@@ -48,20 +43,22 @@ class Server {
         jsonTemplate['systemTime'] = "${DateTime.now().year}-${DateTime.now().month}-"
             "${DateTime.now().day}";
 
-        return Response.ok(jsonTemplate.toString());
+        return Response.ok(base64.encode(utf8.encode(jsonTemplate.toString())));
       }
       return Response.internalServerError();
     }
 
     Future<Response> _modifyAppList(Request request) async {
       if (request.method == 'POST') {
-        final String query = await request.readAsString();
+        final String query = await base64.decode(utf8.decode(request.readAsString() as List<int>)) as String;
         Map queryParams = Uri(query: query).queryParameters;
         if (queryParams.isNotEmpty) {
           var jsonBody = jsonDecode(queryParams.keys.first);
           assert(jsonBody is Map);
-          var masterKey = jsonBody['apiKey'];
-          // TODO: Compare masterKey to actual Key for security
+          var masterKey = jsonBody['masterKey'];
+
+          if(masterKey != config.appMasterKey) return Response.unauthorized("Bad API Key");
+
           int command = jsonBody['command'] as int;
           switch (command) {
             case 1:
@@ -83,15 +80,9 @@ class Server {
               var apiKey = jsonBody['apiKey'];
               List<List> changes = jsonBody['changes'];
               for (int i = 0; i < changes.length; i++) {
-                switch (changes[i][0]) {
-                  case 'appUID':
-                    // TODO: change app UID
-                    break;
-                  case 'apiKey':
-                    // TODO: change the api key
-                    break;
-                  case 'expirationDate':
-                }
+                var varToChange = changes[i][0];
+                var args = changes[i][1];
+                database.modApp(appUID, apiKey, varToChange, args);
               }
               break;
           }
@@ -104,7 +95,6 @@ class Server {
     // Configure routes
     _router = Router()
       ..get('/', _rootHandler)
-      ..get('/rsaPublicKey', _getRsaPublicKey)
       ..get('/app/<uid>', _getPermissionToRun)
       ..post('/modApp', _modifyAppList);
 

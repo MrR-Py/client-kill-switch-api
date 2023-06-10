@@ -9,6 +9,7 @@ class Config {
   dynamic serverPort;
   //dynamic serverAddress;
 
+  dynamic appMasterKey;
   Config(String configFilePath) {
     var jsonTemplate = """
     {
@@ -19,6 +20,9 @@ class Config {
       },
       "server" :{
         "port": 8080
+      },
+      "app": {
+        "masterKey": "master"
       }
     }
     """;
@@ -39,6 +43,8 @@ class Config {
 
     serverPort = configJson['server']['port'].toString();
     //serverAddress = configJson['server']['address'];
+
+    appMasterKey = configJson['app']['masterKey'].toString();
     return;
   }
 }
