@@ -2,7 +2,7 @@
     "database": {
       "port": 27017,
       "address": "localhost",
-      "name": "client-kill-switch"
+      "name": "client-kill-switch-api"
     },
     "server" :{
       "port": 8080

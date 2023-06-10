@@ -50,42 +50,57 @@ class Server {
 
     Future<Response> _modifyAppList(Request request) async {
       if (request.method == 'POST') {
-        final String query = await base64.decode(utf8.decode(request.readAsString() as List<int>)) as String;
+        final String query = await request
+            .readAsString(); //await base64.decode(utf8.decode(request.readAsString() as List<int>)) as String;
         Map queryParams = Uri(query: query).queryParameters;
         if (queryParams.isNotEmpty) {
           var jsonBody = jsonDecode(queryParams.keys.first);
           assert(jsonBody is Map);
           var masterKey = jsonBody['masterKey'];
 
-          if(masterKey != config.appMasterKey) return Response.unauthorized("Bad API Key");
+          if (masterKey != config.appMasterKey)
+            return Response.unauthorized("Bad API Key");
 
-          int command = jsonBody['command'] as int;
+          int command = int.parse(jsonBody['command']);
           switch (command) {
             case 1:
-              // add app
+            // add app
+              var appName = jsonBody['appName'];
               var appUID = jsonBody['appUID'];
               var expirationDate = jsonBody['expirationDate'];
               var apiKey = jsonBody['apiKey'];
+              var allowExecution = jsonBody['allowExecution'];
+              var exitCode = await database.addApp(appName, expirationDate, appUID, apiKey, allowExecution);
+              switch(exitCode) {
+                case -1:
+                  return Response.internalServerError();
+                case 0:
+                  return Response.ok("200 OK");
+                case 1:
+                  return Response.ok('{"errorCode": "1"}');
+              }
               break;
 
             case 2:
-              // delete app
+            // delete app
               var appUID = jsonBody['appUID'];
               var apiKey = jsonBody['apiKey'];
+              await database.deleteApp(appUID, apiKey);
               break;
 
             case 3:
-              // modify app
+            // modify app
               var appUID = jsonBody['appUID'];
               var apiKey = jsonBody['apiKey'];
-              List<List> changes = jsonBody['changes'];
+              List<dynamic> changes = jsonBody['changes'];
               for (int i = 0; i < changes.length; i++) {
                 var varToChange = changes[i][0];
                 var args = changes[i][1];
-                database.modApp(appUID, apiKey, varToChange, args);
+                await database.modApp(appUID, apiKey, varToChange, args);
               }
               break;
           }
+          return Response.ok("200 OK");
         }
         return Response.internalServerError();
       }

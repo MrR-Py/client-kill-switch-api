@@ -19,10 +19,9 @@ class Database {
     dynamic allowExecution;
 
     var collectionName = 'apps';
-    await db?.dropCollection(collectionName);
     var coll = db?.collection(collectionName);
     var res =
-        await coll?.find(where.eq('UID', appUID).eq('apiKey', apiKey)).toList();
+        await coll?.find(where.eq('appUID', appUID).eq('apiKey', apiKey)).toList();
 
     if (res?.length != 0) {
       expirationDate = res?.first['expirationDate'];
@@ -32,20 +31,19 @@ class Database {
   }
 
   Future<int> addApp(String appName, String expirationDate, String appUID,
-      String apiKey) async {
+      String apiKey, bool allowExecution) async {
     var collectionName = 'apps';
-    var appUID;
-    var apiKey;
-    await db?.dropCollection(collectionName);
     var coll = db?.collection(collectionName);
-    var res = await coll?.find(where.eq('name', appName)).toList();
-    if (res?.length == 0) {
+    var res = await coll?.find(where.eq('appName', appName)).toList();
+    if(res == null) return -1;
+    if (res.length == 0) {
       // TODO: Secure apiKey
       coll?.insertOne({
         'appName': appName,
         'expirationDate': expirationDate,
         'appUID': appUID,
-        'apiKey': apiKey
+        'apiKey': apiKey,
+        'allowExecution': allowExecution
       });
       return 0;
     }
@@ -54,18 +52,15 @@ class Database {
 
   Future<int> modApp(String appUID, String apiKey, String varToChange, String args) async{
     var collectionName = 'apps';
-    await db?.dropCollection(collectionName);
     var coll = db?.collection(collectionName);
     var res = await coll?.findOne(where.eq('appUID', appUID).eq('apiKey', apiKey));
     if(res == null) return 1;
-    res[varToChange] = args;
-    await coll?.save(res);
+    await coll?.update(where.eq('appUID', appUID).eq('apiKey', apiKey), modify.set(varToChange, args));
     return 0;
   }
 
   Future<int> deleteApp(String appUID, String apiKey) async {
     var collectionName = 'apps';
-    await db?.dropCollection(collectionName);
     var coll = db?.collection(collectionName);
     await coll?.deleteOne(where.eq('appUID', appUID).eq('apiKey', apiKey));
     return 0;
