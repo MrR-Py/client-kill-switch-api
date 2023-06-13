@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:crypto/crypto.dart';
 
 class Config {
   dynamic dbPort;
@@ -11,24 +12,41 @@ class Config {
 
   dynamic appMasterKey;
   Config(String configFilePath) {
-    var jsonTemplate = """
-    {
-      "database": {
-        "port": 27017,
-        "address": "localhost",
-        "name": "client-kill-switch"
-      },
-      "server" :{
-        "port": 8080
-      },
-      "app": {
-        "masterKey": "master"
-      }
-    }
-    """;
 
     if (!File(configFilePath).existsSync()) {
       var fileCreate = File(configFilePath);
+      while(true) {
+        print(
+            'No config file found! To create a new one, please insert a new password:');
+        String? passwordClear = stdin.readLineSync();
+        print('Confirm password: ');
+        String? passwordConfirm = stdin.readLineSync();
+        if (passwordClear == passwordConfirm) {
+          break;
+        }
+        else {
+          print('That didn\'t work, please try again');
+        }
+      }
+      var passwordClearEncoded = utf8.encode(passwordClear!);
+      var passwordHashed = sha512.convert(passwordClearEncoded);
+
+      var jsonTemplate = """
+      {
+        "database": {
+          "port": 27017,
+          "address": "localhost",
+          "name": "client-kill-switch"
+        },
+        "server" :{
+          "port": 8080
+        },
+        "app": {
+          "masterKey": "$passwordHashed"
+        }
+      }
+      """;
+
       fileCreate.create();
       fileCreate.openWrite();
       fileCreate.writeAsStringSync(jsonTemplate);
@@ -47,4 +65,5 @@ class Config {
     appMasterKey = configJson['app']['masterKey'].toString();
     return;
   }
+
 }

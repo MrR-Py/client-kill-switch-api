@@ -13,7 +13,7 @@ void main(List<String> args) async {
 
   print('Starting Client Kill Switch REST Api');
   var config = Config('./data/config.json');
-  print('Read config file');
+  print('Read config file');  
 
   Database database = Database();
   rest.Server restServer = rest.Server();
