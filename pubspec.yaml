@@ -1,7 +1,7 @@
 name: client_kill_switch_api
-description: A server app using the shelf package and Docker.
+description: A small REST Api that works as a kill-switch for software demos
 version: 0.0.1
-# repository: https://github.com/my_org/my_repo
+repository: https://github.com/MrR-Py/client-kill-switch-api
 
 environment:
   sdk: '>=2.19.2 <3.0.0'

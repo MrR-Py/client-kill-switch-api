@@ -1,7 +1,7 @@
 # Client Kill Switch REST-Api
 
 ## About
-This is a small REST-API I've coded on the GPN21, to help me securely distribute software demos to my customers.
+This is a small REST-API I've coded at the GPN21, to help me distribute software demos to my customers more securely.
 The code is everything but clean right now and there are probably a lot of bugs and insecurities, but I will fix them in the near future whenever I've got time for it.
 The code is meant to run on a self-hosted server, though it only got tested locally, as of right now.
 
