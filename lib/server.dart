@@ -2,10 +2,8 @@ import 'package:client_kill_switch_api/config_controller.dart';
 import 'package:client_kill_switch_api/database_controller.dart';
 
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:shelf/shelf.dart';
-import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class Server {
@@ -58,8 +56,9 @@ class Server {
           assert(jsonBody is Map);
           var masterKey = jsonBody['masterKey'];
 
-          if (masterKey != config.appMasterKey)
+          if (masterKey != config.appMasterKey) {
             return Response.unauthorized("Bad API Key");
+          }
 
           int command = int.parse(jsonBody['command']);
           switch (command) {

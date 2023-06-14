@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'dart:math';
+import 'dart:convert';
 
 import 'package:client_kill_switch_api/database_controller.dart';
 import 'package:client_kill_switch_api/config_controller.dart';
@@ -9,11 +9,27 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
 
+import 'package:crypto/crypto.dart';
+
 void main(List<String> args) async {
 
   print('Starting Client Kill Switch REST Api');
   var config = Config('./data/config.json');
   print('Read config file');  
+
+  while(true) {
+    stdin.echoMode = false;
+    print('Please enter startup password:');
+    String? password = stdin.readLineSync();
+    if(sha512.convert(utf8.encode(password!)).toString() == config.appPassword) {
+      break;
+    }
+    else{
+      print('Wrong password, please try again!');
+      Duration sleepDuration = Duration(seconds:3);
+      sleep(sleepDuration);
+    }
+  }
 
   Database database = Database();
   rest.Server restServer = rest.Server();
