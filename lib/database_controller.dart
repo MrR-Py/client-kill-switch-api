@@ -25,8 +25,9 @@ class Database {
 
     var collectionName = 'apps';
     var coll = db?.collection(collectionName);
-    var res =
-        await coll?.find(where.eq('appUID', appUID).eq('apiKey', apiKey)).toList();
+    var res = await coll
+        ?.find(where.eq('appUID', appUID).eq('apiKey', apiKey))
+        .toList();
 
     if (res?.length != 0) {
       expirationDate = res?.first['expirationDate'];
@@ -41,7 +42,7 @@ class Database {
     var collectionName = 'apps';
     var coll = db?.collection(collectionName);
     var res = await coll?.find(where.eq('appName', appName)).toList();
-    if(res == null) return -1;
+    if (res == null) return -1;
     if (res.length == 0) {
       // TODO: Secure apiKey
       coll?.insertOne({
@@ -57,12 +58,15 @@ class Database {
   }
 
   // Modifies an entry for an app in the database
-  Future<int> modApp(String appUID, String apiKey, String varToChange, String args) async{
+  Future<int> modApp(
+      String appUID, String apiKey, String varToChange, String args) async {
     var collectionName = 'apps';
     var coll = db?.collection(collectionName);
-    var res = await coll?.findOne(where.eq('appUID', appUID).eq('apiKey', apiKey));
-    if(res == null) return 1;
-    await coll?.update(where.eq('appUID', appUID).eq('apiKey', apiKey), modify.set(varToChange, args));
+    var res =
+        await coll?.findOne(where.eq('appUID', appUID).eq('apiKey', apiKey));
+    if (res == null) return 1;
+    await coll?.update(where.eq('appUID', appUID).eq('apiKey', apiKey),
+        modify.set(varToChange, args));
     return 0;
   }
 

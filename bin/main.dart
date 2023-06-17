@@ -12,22 +12,27 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:crypto/crypto.dart';
 
 void main(List<String> args) async {
-
   // "Startup sequence": Checks for a password before starting.
   print('Starting Client Kill Switch REST Api');
   var config = Config('./data/config.json');
-  print('Read config file');  
+  print('Read config file');
 
-  while(true) {
-    stdin.echoMode = false;
+  while (true) {
+    try {
+      stdin.echoMode = false;
+    } catch (e) {
+      print(e);
+      print('Error starting up. Try launching in Windows Terminal or when you'
+          'are using Linux, try launching in TTY.');
+    }
     print('Please enter startup password:');
     String? password = stdin.readLineSync();
-    if(sha512.convert(utf8.encode(password!)).toString() == config.appPassword) {
+    if (sha512.convert(utf8.encode(password!)).toString() ==
+        config.appPassword) {
       break;
-    }
-    else{
+    } else {
       print('Wrong password, please try again!');
-      Duration sleepDuration = Duration(seconds:3);
+      Duration sleepDuration = Duration(seconds: 3);
       sleep(sleepDuration);
     }
   }

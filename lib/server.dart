@@ -19,7 +19,6 @@ class Server {
 
     // Checks the database with database.checkPermission and returns the result.
     Future<Response> getPermissionToRun(Request request) async {
-
       // Json template with placeholders
       var jsonTemplateString = """
       {
@@ -45,10 +44,11 @@ class Server {
             await database.checkPermission(appUID, apiKeyUserInput);
         jsonTemplate['expirationDate'] = checkResult[0].toString();
         jsonTemplate['allowExecution'] = checkResult[1].toString();
-        jsonTemplate['systemTime'] = "${DateTime.now().year}-${DateTime.now().month}-"
+        jsonTemplate['systemTime'] =
+            "${DateTime.now().year}-${DateTime.now().month}-"
             "${DateTime.now().day}";
 
-        return Response.ok(base64.encode(utf8.encode(jsonTemplate.toString())));
+        return Response.ok(jsonTemplate.toString());
       }
       return Response.internalServerError();
     }
@@ -58,8 +58,7 @@ class Server {
     // the general app password.
     Future<Response> modifyAppList(Request request) async {
       if (request.method == 'POST') {
-        final String query = await request
-            .readAsString();
+        final String query = await request.readAsString();
         Map queryParams = Uri(query: query).queryParameters;
         if (queryParams.isNotEmpty) {
           var jsonBody = jsonDecode(queryParams.keys.first);
@@ -73,14 +72,15 @@ class Server {
           int command = int.parse(jsonBody['command']);
           switch (command) {
             case 1:
-            // add app
+              // add app
               var appName = jsonBody['appName'];
               var appUID = jsonBody['appUID'];
               var expirationDate = jsonBody['expirationDate'];
               var apiKey = jsonBody['apiKey'];
               var allowExecution = jsonBody['allowExecution'];
-              var exitCode = await database.addApp(appName, expirationDate, appUID, apiKey, allowExecution);
-              switch(exitCode) {
+              var exitCode = await database.addApp(
+                  appName, expirationDate, appUID, apiKey, allowExecution);
+              switch (exitCode) {
                 case -1:
                   return Response.internalServerError();
                 case 0:
@@ -92,14 +92,14 @@ class Server {
               break;
 
             case 2:
-            // delete app
+              // delete app
               var appUID = jsonBody['appUID'];
               var apiKey = jsonBody['apiKey'];
               await database.deleteApp(appUID, apiKey);
               break;
 
             case 3:
-            // modify app
+              // modify app
               var appUID = jsonBody['appUID'];
               var apiKey = jsonBody['apiKey'];
               List<dynamic> changes = jsonBody['changes'];
