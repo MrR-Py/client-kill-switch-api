@@ -4,9 +4,12 @@ import 'package:mongo_dart/mongo_dart.dart';
 
 import 'package:crypto/crypto.dart';
 
+// Database as a class is needed so that it is possible that a connection can
+// occur once and only once.
 class Database {
   Db? db;
 
+  // Init function to connect to database,
   Future<bool> init(String address, String port, String name) async {
     db = Db('mongodb://$address:$port/$name');
     await db?.open();
@@ -14,6 +17,8 @@ class Database {
     return true;
   }
 
+  // Database check for relevant data whether an app is "allowed" to start
+  // or not
   Future<List<String>> checkPermission(String appUID, String apiKey) async {
     dynamic expirationDate;
     dynamic allowExecution;
@@ -30,6 +35,7 @@ class Database {
     return [expirationDate.toString(), allowExecution.toString()];
   }
 
+  // Adds a database entry for an app
   Future<int> addApp(String appName, String expirationDate, String appUID,
       String apiKey, bool allowExecution) async {
     var collectionName = 'apps';
@@ -50,6 +56,7 @@ class Database {
     return 1;
   }
 
+  // Modifies an entry for an app in the database
   Future<int> modApp(String appUID, String apiKey, String varToChange, String args) async{
     var collectionName = 'apps';
     var coll = db?.collection(collectionName);
@@ -59,6 +66,7 @@ class Database {
     return 0;
   }
 
+  // Deletes an entry for an app in a database
   Future<int> deleteApp(String appUID, String apiKey) async {
     var collectionName = 'apps';
     var coll = db?.collection(collectionName);

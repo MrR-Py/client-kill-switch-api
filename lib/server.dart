@@ -9,12 +9,18 @@ import 'package:shelf_router/shelf_router.dart';
 class Server {
   var _router;
 
+  // Init function is needed because writing that code in the constructor is
+  // 1) Bad practice, and
+  // 2) Not possible as it would result in multiple syntax errors.
   Router init(Database database, Config config) {
-    Response _rootHandler(Request request) {
+    Response rootHandler(Request request) {
       return Response.ok('Client Kill Switch v0.0.1');
     }
 
-    Future<Response> _getPermissionToRun(Request request) async {
+    // Checks the database with database.checkPermission and returns the result.
+    Future<Response> getPermissionToRun(Request request) async {
+
+      // Json template with placeholders
       var jsonTemplateString = """
       {
         "expirationDate": "1970-01-01",
@@ -34,6 +40,7 @@ class Server {
         assert(jsonBody is Map);
         var apiKeyUserInput = jsonBody['apiKey'];
 
+        // Edit JSON template with the correct data.
         List<String> checkResult =
             await database.checkPermission(appUID, apiKeyUserInput);
         jsonTemplate['expirationDate'] = checkResult[0].toString();
@@ -46,10 +53,13 @@ class Server {
       return Response.internalServerError();
     }
 
-    Future<Response> _modifyAppList(Request request) async {
+    // Function that gets called to modify database entries of apps. Needs the
+    // master password of the app, which is different from any API key and
+    // the general app password.
+    Future<Response> modifyAppList(Request request) async {
       if (request.method == 'POST') {
         final String query = await request
-            .readAsString(); //await base64.decode(utf8.decode(request.readAsString() as List<int>)) as String;
+            .readAsString();
         Map queryParams = Uri(query: query).queryParameters;
         if (queryParams.isNotEmpty) {
           var jsonBody = jsonDecode(queryParams.keys.first);
@@ -74,9 +84,10 @@ class Server {
                 case -1:
                   return Response.internalServerError();
                 case 0:
-                  return Response.ok("200 OK");
+                  return Response.ok('{"code": "0", "message": "ok"}');
                 case 1:
-                  return Response.ok('{"errorCode": "1"}');
+                  return Response.ok('{"code": "1", '
+                      '"message":"app already exists"}');
               }
               break;
 
@@ -99,7 +110,7 @@ class Server {
               }
               break;
           }
-          return Response.ok("200 OK");
+          return Response.ok('{"code": "0", "message": "ok"}');
         }
         return Response.internalServerError();
       }
@@ -108,9 +119,9 @@ class Server {
 
     // Configure routes
     _router = Router()
-      ..get('/', _rootHandler)
-      ..get('/app/<uid>', _getPermissionToRun)
-      ..post('/modApp', _modifyAppList);
+      ..get('/', rootHandler)
+      ..get('/app/<uid>', getPermissionToRun)
+      ..post('/modApp', modifyAppList);
 
     return _router;
   }

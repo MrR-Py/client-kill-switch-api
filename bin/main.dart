@@ -13,6 +13,7 @@ import 'package:crypto/crypto.dart';
 
 void main(List<String> args) async {
 
+  // "Startup sequence": Checks for a password before starting.
   print('Starting Client Kill Switch REST Api');
   var config = Config('./data/config.json');
   print('Read config file');  
@@ -31,6 +32,8 @@ void main(List<String> args) async {
     }
   }
 
+  // If password is successful, connect with the MongoDB database via the
+  // Database class in the database.dart file.
   Database database = Database();
   rest.Server restServer = rest.Server();
 
