@@ -23,7 +23,8 @@ void main(List<String> args) async {
     } catch (e) {
       print(e);
       print('Error starting up. Try launching in Windows Terminal or when you'
-          'are using Linux, try launching in TTY.');
+          ' are using Linux, try launching in TTY.');
+      exit(-1);
     }
     print('Please enter startup password:');
     String? password = stdin.readLineSync();
